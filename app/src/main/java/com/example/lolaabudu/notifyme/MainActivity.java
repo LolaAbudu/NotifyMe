@@ -18,16 +18,16 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-
     private Button button_notify;
-    private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
-    private NotificationManager mNotifyManager;
-    private static final int NOTIFICATION_ID = 0;
     private Button button_cancel;
     private Button button_update;
+    private static final int NOTIFICATION_ID = 0;
+    private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
     private static final String ACTION_UPDATE_NOTIFICATION =
             "com.example.android.notifyme.ACTION_UPDATE_NOTIFICATION";
+    private NotificationManager mNotifyManager;
     private NotificationReceiver mReceiver = new NotificationReceiver();
+
 
     public class NotificationReceiver extends BroadcastReceiver {
 
@@ -72,14 +72,12 @@ public class MainActivity extends AppCompatActivity {
                 cancelNotification();
             }
         });
-
         createNotificationChannel();
         setNotificationButtonState(true, false, false);
-
-//        registerReceiver(mReceiver,new IntentFilter(ACTION_UPDATE_NOTIFICATION));
     }
 
-    public void createNotificationChannel() {
+    public void createNotificationChannel() {   //do for API 26 and up, or it wont create/send the notification
+        //first Instantiate NotificationManager Class above, then use it to call getSystemService()
         mNotifyManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         if (android.os.Build.VERSION.SDK_INT >=
@@ -99,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     public void sendNotification() {
 
         NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
-        mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
+        mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());   //call notify() to send the notification and pass in 2 paramenters, 1st is the ID, 2nd is the NotificationCompat object that you created using the NotificationCompat.Builder object
 
         setNotificationButtonState(false, true, true);
         Intent updateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
@@ -110,22 +108,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //BELOW is how you create a notification w/ icon, title, text, autocancel, priority level,
     private NotificationCompat.Builder getNotificationBuilder(){
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent notificationPendingIntent = PendingIntent.getActivity(this,
                 NOTIFICATION_ID, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-
         NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, PRIMARY_CHANNEL_ID)
-
                 .setContentTitle("You've been notified!")
                 .setContentText("This is your notification text.")
-                .setSmallIcon(R.drawable.ic_android)
-                .setContentIntent(notificationPendingIntent)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSmallIcon(R.drawable.ic_android)    //the icon that shows in the notification drawer (THIS IS THE ONLY THING YOU NEED FOR A NOTIFICATION, EVERYTHING ELSE IS OPTIONAL AND PREFERENCE)
+                .setContentIntent(notificationPendingIntent)   //aka tap action, aka what happens when the user taps the notification tab; passes in the pending Intent
+                .setAutoCancel(true)   //the notification cancels itself after an action is performed such as the user tapping it
+                .setPriority(NotificationCompat.PRIORITY_HIGH)   //for API 26 and up
                 .setDefaults(NotificationCompat.DEFAULT_ALL);
-
         return notifyBuilder;
     }
 
@@ -143,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void cancelNotification() {
         mNotifyManager.cancel(NOTIFICATION_ID);
-
         setNotificationButtonState(true, false, false);
     }
 
