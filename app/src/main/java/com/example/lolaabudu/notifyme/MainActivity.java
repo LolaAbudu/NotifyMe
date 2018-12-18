@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         button_notify = findViewById(R.id.notify);
+        registerReceiver(mReceiver,new IntentFilter(ACTION_UPDATE_NOTIFICATION));
         button_notify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //Update the notification
+                updateNotification();
             }
         });
 
@@ -67,12 +69,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //Cancel the notification
+                cancelNotification();
             }
         });
 
+        createNotificationChannel();
         setNotificationButtonState(true, false, false);
 
-        registerReceiver(mReceiver,new IntentFilter(ACTION_UPDATE_NOTIFICATION));
+//        registerReceiver(mReceiver,new IntentFilter(ACTION_UPDATE_NOTIFICATION));
     }
 
     public void createNotificationChannel() {
@@ -93,14 +97,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void sendNotification() {
-        Intent updateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
-        PendingIntent updatePendingIntent = PendingIntent.getBroadcast
-                (this, NOTIFICATION_ID, updateIntent, PendingIntent.FLAG_ONE_SHOT);
 
         NotificationCompat.Builder notifyBuilder = getNotificationBuilder();
         mNotifyManager.notify(NOTIFICATION_ID, notifyBuilder.build());
 
         setNotificationButtonState(false, true, true);
+        Intent updateIntent = new Intent(ACTION_UPDATE_NOTIFICATION);
+        PendingIntent updatePendingIntent = PendingIntent.getBroadcast
+                (this, NOTIFICATION_ID, updateIntent, PendingIntent.FLAG_ONE_SHOT);
 
         notifyBuilder.addAction(R.drawable.ic_update, "Update Notification", updatePendingIntent);
 
@@ -121,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setDefaults(NotificationCompat.DEFAULT_ALL);
-
 
         return notifyBuilder;
     }
